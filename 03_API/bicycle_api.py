@@ -1,5 +1,6 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response
 import sqlite3
+import json
 
 app = Flask(__name__) #create the app
 
@@ -15,7 +16,7 @@ def get_customers():
         cursor = conn.cursor() #create the cursor
         result = cursor.execute("SELECT * FROM customers") #Runs a query to fetch all customer records
         rows = result.fetchall() #Give me all rows returned by the query, in a list
-        customers = [
+        customers = [ #doing this so that data is displayed with correct order
             {
                 "id": row["id"],
                 "name": row["name"],
@@ -25,7 +26,10 @@ def get_customers():
             }
             for row in rows
         ] # turn each row into dict and return the list of ordered dictoniories
-        return jsonify(customers),200 #return all customers and sucess code 
-
+        #return jsonify(customers),200 # commenting this out because jsonify was messing with the order
+        return Response(
+            json.dumps(customers, indent=2), #converting dict to json string
+            mimetype="application/json" #telling Flask to treat it as JSON string
+        )
 if __name__ == "__main__":
     app.run(debug=True)
