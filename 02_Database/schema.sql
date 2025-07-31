@@ -2,7 +2,7 @@
 CREATE TABLE IF NOT EXISTS customers (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
-    email TEXT,
+    email TEXT UNIQUE,
     phone TEXT,
     address TEXT
 );
@@ -10,14 +10,14 @@ CREATE TABLE IF NOT EXISTS customers (
 -- Vendors Table(MM)
 CREATE TABLE IF NOT EXISTS vendors (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT,
+    name TEXT UNIQUE,
     contact TEXT
 );
 
 -- Materials Table (MM + PP)
 CREATE Table IF NOT EXISTS materials (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
+    name TEXT NOT NULL UNIQUE,
     type TEXT, --raw or finished
     unit price REAL,
     stock INTEGER
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS production_orders (
 -- Cost Centers Table (FI/CO)
 CREATE TABLE IF NOT EXISTS cost_centers (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    code TEXT NOT NULL,
+    code TEXT NOT NULL UNIQUE,
     name TEXT
 );
 
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS expenses (
 -- Departments Table (HCM)
 CREATE TABLE IF NOT EXISTS departments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL
+    name TEXT NOT NULL UNIQUE
 );
 
 -- Employees Table (HCM)
