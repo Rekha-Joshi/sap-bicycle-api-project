@@ -1,5 +1,5 @@
 -- Customer Table (SD)
-CREATE TABLE customers (
+CREATE TABLE IF NOT EXISTS customers (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     email TEXT,
@@ -8,14 +8,14 @@ CREATE TABLE customers (
 );
 
 -- Vendors Table(MM)
-CREATE TABLE vendors (
+CREATE TABLE IF NOT EXISTS vendors (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT,
     contact TEXT
 );
 
 -- Materials Table (MM + PP)
-CREATE Table materials (
+CREATE Table IF NOT EXISTS materials (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     type TEXT, --raw or finished
@@ -24,7 +24,7 @@ CREATE Table materials (
 );
 
 -- Sales Order Table (SD)
-CREATE Table sales_orders (
+CREATE Table IF NOT EXISTS sales_orders (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     customer_id INTEGER NOT NULL,
     material_id INTEGER NOT NULL,
@@ -36,7 +36,7 @@ CREATE Table sales_orders (
 );
 
 -- Production Orders Table (PP)
-CREATE TABLE production_orders (
+CREATE TABLE IF NOT EXISTS production_orders (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     material_id INTEGER NOT NULL,
     quantity INTEGER,
@@ -47,14 +47,14 @@ CREATE TABLE production_orders (
 );
 
 -- Cost Centers Table (FI/CO)
-CREATE TABLE cost_centers (
+CREATE TABLE IF NOT EXISTS cost_centers (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     code TEXT NOT NULL,
     name TEXT
 );
 
 -- Expenses Table (FI/CO)
-CREATE TABLE expenses (
+CREATE TABLE IF NOT EXISTS expenses (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     cost_center_id INTEGER NOT NULL,
     amount REAL,
@@ -64,13 +64,13 @@ CREATE TABLE expenses (
 );
 
 -- Departments Table (HCM)
-CREATE TABLE departments (
+CREATE TABLE IF NOT EXISTS departments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL
 );
 
 -- Employees Table (HCM)
-CREATE TABLE employees (
+CREATE TABLE IF NOT EXISTS employees (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     department_id INTEGER,
