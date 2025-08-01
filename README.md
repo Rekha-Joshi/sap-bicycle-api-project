@@ -15,3 +15,5 @@ This end-to-end mini ERP project serves as a **QA portfolio piece**, showcasing:
 - Ability to work with databases using **SQL (SQLite)**
 - Structured QA documentation, defect tracking, and test case management
 - Full version control with **Git and GitHub**
+
+![Entity Relationship Diagram](../06_Diagrams/er_diagram.png)
