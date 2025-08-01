@@ -9,6 +9,6 @@ with sqlite3.connect("02_Database/bike_project.db") as conn: #when using with, c
         sql_script = file.read() #reading the entire file as string
     
     #Execute all commands from the file
-    cursor.executescript(sql_script) # because our file has many lines
+    cursor.executescript(sql_script) # using executescript because our file has many lines
     conn.commit()
 print("Database and tables created successfully.")

@@ -1,17 +1,22 @@
 from flask import Flask, jsonify, request, Response
 import sqlite3
 import json
+#gloabal variable
+DB_PATH = "02_Database/bike_project.db"
 
 app = Flask(__name__) #create the app
 
+#Default route
 @app.route("/") # this function runs when we run this program
 def home():
     return("Hello API")
 
+#Customers route. Defining end point to get customers
+## Fetch and return all customers from the database (GET)
 @app.route("/customers") #Fetch users
 def get_customers():
     #create DB connections
-    with sqlite3.connect("02_Database/bike_project.db") as conn:
+    with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row #Allows access to each database row like a dictionary (e.g., row["name"])
         cursor = conn.cursor() #create the cursor
         result = cursor.execute("SELECT * FROM customers") #Runs a query to fetch all customer records
@@ -31,5 +36,24 @@ def get_customers():
             json.dumps(customers, indent=2), #converting dict to json string
             mimetype="application/json" #telling Flask to treat it as JSON string
         )
+    
+## Accepts JSON data and inserts a new customer record into the database
+# Skips duplicates if email already exists (email must be unique)    
+@app.route("/customers", methods = ["POST"] )
+def create_customer():
+    data = request.get_json()
+    try:
+        with sqlite3.connect(DB_PATH) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                INSERT INTO customers(name, email, phone, address)
+                VALUES (?,?,?,?)
+                """, (data["name"], data["email"], data["phone"], data["address"])
+            )
+            conn.commit()
+            return {"message": "Customer added successfully"}, 201 #success code for creation
+    except sqlite3.IntegrityError:
+        return {"error": "Customer with this email already exists"}, 409
 if __name__ == "__main__":
     app.run(debug=True)
