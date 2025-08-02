@@ -1,0 +1,1 @@
+DB_PATH = "02_Database/bike_project.db"

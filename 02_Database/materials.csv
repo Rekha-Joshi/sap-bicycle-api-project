@@ -1,0 +1,13 @@
+name,type,unit_price,stock
+Mountain Bike,finished,800.00,10
+Road Bike,finished,750.00,7
+Hybrid Bike,finished,700.00,5
+Bike Frame (Aluminum),raw,150.00,25
+Bike Frame (Carbon),raw,220.00,10
+Tire (29 inch),raw,45.00,50
+Brake Set,raw,60.00,40
+Gear Set,raw,110.00,35
+Seat (Standard),raw,20.00,60
+Handlebar (Steel),raw,30.00,30
+Pedals (Pair),raw,15.00,45
+Chain,raw,25.00,50

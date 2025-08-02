@@ -1,3 +1,4 @@
+from config import DB_PATH
 from flask import Flask, jsonify, request, Response
 import sqlite3
 import json
