@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, Response, Blueprint
+from flask import jsonify, request, Response, Blueprint
 import sqlite3
 import json
 
