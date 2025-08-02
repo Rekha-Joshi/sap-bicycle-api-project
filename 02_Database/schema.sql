@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS departments (
 CREATE TABLE IF NOT EXISTS employees (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
-    department_id INTEGER,
+    department_name TEXT,
     job_title TEXT,
-    FOREIGN KEY (department_id) REFERENCES departments(id)
+    FOREIGN KEY (department_name) REFERENCES departments(name)
 );
