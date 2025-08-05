@@ -2,8 +2,11 @@ from flask import jsonify, request, Response, Blueprint
 import sqlite3
 import json
 
-#Define Blueprint
+#Create Blueprint. It's like a mini app
 customers_bp = Blueprint("customers", __name__)
+#Blueprint is a Flask class that lets you define a group of routes.
+#first varible is the name of the blueprint. 
+#__name__ tells python that this file is the starting point of this blueprint.
 
 #gloabal variable
 DB_PATH = "02_Database/bike_project.db"

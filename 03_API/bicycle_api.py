@@ -7,7 +7,7 @@ from flask import Flask
 from routes import customers_bp, vendors_bp
 
 app = Flask(__name__) #create the app
-app.register_blueprint(customers_bp)
+app.register_blueprint(customers_bp) #plugs the mini app to the main app
 app.register_blueprint(vendors_bp)
 
 #Default route
