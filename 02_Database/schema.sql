@@ -19,7 +19,7 @@ CREATE Table IF NOT EXISTS materials (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL UNIQUE,
     type TEXT, --raw or finished
-    unit price REAL,
+    unit_price REAL,
     stock INTEGER
 );
 

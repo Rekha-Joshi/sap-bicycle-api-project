@@ -8,7 +8,7 @@ with sqlite3.connect("02_Database/bike_project.db") as conn:
         for row in reader:
             cursor.execute (
                 """
-                INSERT INTO materials (name, type, unit, stock)
+                INSERT INTO materials (name, type, unit_price, stock)
                 VALUES (?,?,?,?)
                 """,
                 (row["name"], row["type"], row["unit_price"], row["stock"])

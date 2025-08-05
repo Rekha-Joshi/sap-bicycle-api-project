@@ -52,6 +52,7 @@ def create_customer():
                 """, (data["name"], data["email"], data["phone"], data["address"])
             )
             conn.commit()
-            return {"message": "Customer added successfully"}, 201 #success code for creation
+            return jsonify({"message": "Customer added successfully"}), 201 
+        #success code for creation
     except sqlite3.IntegrityError:
-        return {"error": "Customer with this email already exists"}, 409
+        return jsonify({"error": "Customer with this email already exists"}), 409

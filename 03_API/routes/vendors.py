@@ -40,6 +40,7 @@ def set_vendors():
                 """, (data["name"], data["contact"])
            ) 
            conn.commit()
-           return {"message": "Vendor added successfully"}, 201 #success code for creation
+           return jsonify({"message": "Vendor added successfully"}), 201 
+        #success code for creation
     except sqlite3.IntegrityError:
-        return {"error": "Vendor with this name already exists"}, 409
+        return jsonify({"error": "Vendor with this name already exists"}), 409

@@ -4,11 +4,12 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from flask import Flask
-from routes import customers_bp, vendors_bp
+from routes import customers_bp, vendors_bp, materials_bp
 
 app = Flask(__name__) #create the app
 app.register_blueprint(customers_bp) #plugs the mini app to the main app
 app.register_blueprint(vendors_bp)
+app.register_blueprint(materials_bp)
 
 #Default route
 @app.route("/") # this function runs when we run this program
