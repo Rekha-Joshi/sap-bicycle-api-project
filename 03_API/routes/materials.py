@@ -117,3 +117,30 @@ def update_material_stock(id):
             return jsonify({"error": f"Material with ID {id} not found"}), 404
         conn.commit()
         return jsonify({"message":"Stock updated successfully"}), 200
+
+#assign vendor id to materials
+@materials_bp.route("/materials/assign_vendor", methods = ["PUT"])
+def assign_vendor():
+    data = request.get_json()
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        if not data or "material_name" not in data or "vendor_id" not in data:
+            return jsonify ({"error": "Missing mandatory filed. Check if 'material_name' and 'vendor_id' are present."}), 400
+        #check if material exists
+        cursor.execute("SELECT * FROM materials WHERE name = ?",(data["material_name"],))
+        material = cursor.fetchone()
+        #check if vendor exists
+        cursor.execute("SELECT * FROM vendors WHERE id = ?",(data["vendor_id"],))
+        vendor = cursor.fetchone()
+        if material and vendor:
+            material_type = material["type"]
+            if material_type == "finished":
+                return jsonify({
+                    "error": "Cannot assign a vendor to a finished product."
+                }), 400
+            cursor.execute("UPDATE materials SET vendor_id = ? WHERE name = ?",(data["vendor_id"],data["material_name"]))
+            conn.commit()
+            return jsonify({"message":f"Vendor id updated successfully for '{data["material_name"]}'"}),200
+        else:
+            return jsonify ({"error":"Please check if material exists and vendor exists."}),404

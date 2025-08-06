@@ -10,3 +10,13 @@ A new vendor is added to the system. The vendor is assigned to supply certain ra
 ## Tables Involved
 - vendors
 - materials
+
+## Testing
+Added a new vendor using POST /vendors with name and contact details.
+Added a new raw material using POST /materials (if it didn’t already exist).
+Assigned the vendor to a raw material using PUT /materials/assign-vendor.
+Verified that:
+The vendor and material both exist before assignment
+Finished products cannot be assigned a vendor
+Appropriate error messages are returned for invalid inputs
+Tested all routes successfully using Postman.
