@@ -18,7 +18,9 @@ def get_materials():
                 "name": row["name"],
                 "type": row["type"],
                 "unit": row["unit_price"],
-                "stock": row["stock"]
+                "stock": row["stock"],
+                "reorder_level": row["reorder_level"],
+                "vendor_id": row["vendor_id"]
             }for row in rows
         ]
         return Response(
@@ -34,14 +36,15 @@ def set_materials():
         try:
             cursor.execute (
                 """
-                INSERT INTO materials(name, type, unit_price, stock)
-                VALUES (?,?,?,?)
+                INSERT INTO materials(name, type, unit_price, stock, vendor_id)
+                VALUES (?,?,?,?,?)
                 """, 
                 (
                         material["name"], 
                         material["type"], 
                         material["unit_price"], 
-                        material["stock"]
+                        material["stock"],
+                        material.get("vendor_id") # if blank, it won't throw error
                 )
             )
         except sqlite3.IntegrityError:
@@ -76,7 +79,9 @@ def check_stock():
                 "name": row["name"],
                 "type": row["type"],
                 "unit_price": row["unit_price"],
-                "stock": row["stock"]
+                "stock": row["stock"],
+                "reorder_level": row["reorder_level"],
+                "vendor_id": row["vendor_id"]   
             }for row in rows
         ]
         if not items:

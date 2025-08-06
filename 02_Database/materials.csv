@@ -1,13 +1,32 @@
-name,type,unit_price,stock
-Mountain Bike,finished,800.00,10
-Road Bike,finished,750.00,7
-Hybrid Bike,finished,700.00,5
-Bike Frame (Aluminum),raw,150.00,25
-Bike Frame (Carbon),raw,220.00,10
-Tire (29 inch),raw,45.00,50
-Brake Set,raw,60.00,40
-Gear Set,raw,110.00,35
-Seat (Standard),raw,20.00,60
-Handlebar (Steel),raw,30.00,30
-Pedals (Pair),raw,15.00,45
-Chain,raw,25.00,50
+name,type,unit_price,stock,vendor_id
+Mountain Bike,finished,800.0,10,
+Road Bike,finished,750.0,7,
+Hybrid Bike,finished,700.0,5,
+Bike Frame (Aluminum),raw,150.0,25,5
+Bike Frame (Carbon),raw,220.0,10,2
+Tire (29 inch),raw,45.0,50,5
+Brake Set,raw,60.0,40,6
+Gear Set,raw,110.0,35,5
+Seat (Standard),raw,20.0,60,2
+Handlebar (Steel),raw,30.0,30,5
+Pedals (Pair),raw,15.0,45,1
+Chain,raw,25.0,50,2
+Shock Absorber,raw,65.0,20,5
+Spoke Set,raw,12.0,70,1
+Crank Arm,raw,35.0,30,4
+Disc Brake,raw,55.0,25,4
+Axle Set,raw,40.0,15,1
+Cassette,raw,50.0,18,3
+Front Fork,raw,95.0,12,6
+Wheel Rim (Alloy),raw,75.0,22,2
+Saddle (Comfort),raw,25.0,45,2
+Kickstand,raw,10.0,100,4
+Reflector Set,raw,5.0,120,3
+Tubeless Tire Sealant,raw,8.0,60,2
+Rear Derailleur,raw,70.0,20,5
+Chainring,raw,28.5,75,3
+Brake Cable,raw,6.5,90,6
+Valve Stem,raw,4.5,80,3
+Grip Set,raw,12.0,95,2
+Commuter Bike,finished,690.0,9,
+Touring Bike,finished,980.0,6,

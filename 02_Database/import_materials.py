@@ -8,10 +8,10 @@ with sqlite3.connect("02_Database/bike_project.db") as conn:
         for row in reader:
             cursor.execute (
                 """
-                INSERT INTO materials (name, type, unit_price, stock)
-                VALUES (?,?,?,?)
+                INSERT INTO materials (name, type, unit_price, stock, vendor_id)
+                VALUES (?,?,?,?,?)
                 """,
-                (row["name"], row["type"], row["unit_price"], row["stock"])
+                (row["name"], row["type"], row["unit_price"], row["stock"], row["vendor_id"])
             )
     conn.commit()
 print("Materials data imported successfully")

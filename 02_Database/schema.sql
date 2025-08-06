@@ -15,12 +15,15 @@ CREATE TABLE IF NOT EXISTS vendors (
 );
 
 -- Materials Table (MM + PP)
-CREATE Table IF NOT EXISTS materials (
+CREATE TABLE IF NOT EXISTS materials (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL UNIQUE,
-    type TEXT, --raw or finished
+    name TEXT UNIQUE,
+    type TEXT,
     unit_price REAL,
-    stock INTEGER
+    stock INTEGER,
+    reorder_level INTEGER DEFAULT 30,
+    vendor_id INTEGER,
+    FOREIGN KEY (vendor_id) REFERENCES vendors(id)
 );
 
 -- Sales Order Table (SD)
