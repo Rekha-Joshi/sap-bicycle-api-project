@@ -56,3 +56,19 @@ def create_customer():
         #success code for creation
     except sqlite3.IntegrityError:
         return jsonify({"error": "Customer with this email already exists"}), 409
+    
+@customers_bp.route("/customers/by-email", methods = ["GET"])
+def get_customer_by_email():
+    email = request.args.get("email")
+    if not email:
+        return jsonify({"error": "Email query parameter is required"}), 400
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM customers WHERE email = ?",(email,))
+        row = cursor.fetchone()
+        if row:
+            customer = dict(row)
+            return jsonify(customer), 200
+        else:
+            return jsonify({"message": "Customer not found"}), 404

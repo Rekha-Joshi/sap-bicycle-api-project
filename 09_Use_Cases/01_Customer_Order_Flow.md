@@ -25,3 +25,16 @@ A customer places an order for bicycles. The system checks if the product is ava
 - production_orders
 - expenses
 - cost_centers
+
+Phase 1: Order Creation
+  Customer orders a bicycle - Add customer
+  Create /sales_orders POST
+  Check if finished product stock is enough
+  If yes → update stock + create order as confirmed
+Phase 2: If Out of Stock
+  Trigger /production_orders
+  Add stock after production completes
+  Update order status
+Phase 3: Track Cost and Shipping
+  Add expense record
+  Update status to “shipped”
