@@ -10,3 +10,10 @@ When a new employee joins the company, they need to be added to the system and a
 ## Tables Involved
 - employees
 - departments
+
+## Testing
+- I tested the /employees endpoint using Postman.
+- I added a new employee with name, department name, and job title.
+- It worked and showed a success message.
+- I also tested with a wrong department name, and it gave an error.
+- Then I tried missing fields like name or job title, and it showed a proper error message.
