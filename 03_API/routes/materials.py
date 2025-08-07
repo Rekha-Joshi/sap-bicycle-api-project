@@ -27,7 +27,7 @@ def get_materials():
             json.dumps(materials, indent=2),
             mimetype="application/json"
         )
-#add new materials
+#add new materials. single or bulk
 @materials_bp.route("/materials", methods=["POST"])
 def set_materials():
     data = request.get_json()
