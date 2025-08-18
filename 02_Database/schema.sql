@@ -40,13 +40,15 @@ CREATE Table IF NOT EXISTS sales_orders (
 
 -- Production Orders Table (PP)
 CREATE TABLE IF NOT EXISTS production_orders (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    material_id INTEGER NOT NULL,
-    quantity INTEGER,
-    start_date TEXT,
-    end_date TEXT,
-    status TEXT,
-    FOREIGN KEY (material_id) REFERENCES materials(id)
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  sales_order_id INTEGER NOT NULL,
+  material_id INTEGER NOT NULL,
+  planned_quantity INTEGER NOT NULL,
+  start_date TEXT,   -- set when you create the PO (or now)
+  end_date   TEXT,   -- set when you complete the PO
+  status     TEXT,   -- "Planned" | "In-Progress" | "Completed"
+  FOREIGN KEY (sales_order_id) REFERENCES sales_orders(id),
+  FOREIGN KEY (material_id)     REFERENCES materials(id)
 );
 
 -- Cost Centers Table (FI/CO)
