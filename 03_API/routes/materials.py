@@ -2,7 +2,7 @@ from flask import Flask , jsonify, Response, request, Blueprint
 import sqlite3
 import json
 
-materials_bp = Blueprint("materials", __name__)
+materials_bp = Blueprint("materials", __name__) #defining blueprint
 
 DB_PATH = "02_Database/bike_project.db"
 #get all materials
@@ -44,7 +44,7 @@ def set_materials():
                         material["type"], 
                         material["unit_price"], 
                         material["stock"],
-                        material.get("vendor_id") # if blank, it won't throw error
+                        material.get("vendor_id") # if blank, it won't throw error. vendor_id will be empty for finished product
                 )
             )
         except sqlite3.IntegrityError:
