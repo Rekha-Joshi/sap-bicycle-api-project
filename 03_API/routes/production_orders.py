@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request, Response, Blueprint
 import sqlite3
 import json
+from datetime import date
 
 #defining blueprint
 production_orders_bp = Blueprint("production_orders", __name__)
@@ -47,3 +48,37 @@ def create_prod_order():
         "message": "Production order created successfully.",
         "order_id": order_id,
     }), 201
+
+@production_orders_bp.route("/production_orders/<int:po_id>/complete", methods = ["PUT"])
+def complete_production_order(po_id):
+    data = request.get.json() or {}
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        #1) Load PO
+        cursor.execute("SELECT * FROM production_orders WHERE id = ?", po_id)
+        po = cursor.fetchone()
+        if not po: return jsonify({"error":"Production order not found"}), 404
+        if po["status"] == "completed": return jsonify({"error":"Already completed"}), 400
+        
+        #2) Decide quantity
+        qty = int(data.get("actual_quantity", po["planned_quantity"]))
+        if qty <= 0: return jsonify({"error":"Quantity must be > 0"}), 400
+
+        #3) Add stock
+        cursor.execute("UPDATE materials SET stock = stock + ? WHERE id = ?", (qty,po["material_id"]))
+
+        #4) Mark production order completed
+        cursor.execute("UPDATE production_orders SET status = 'Completed', end_date = datetime('now') WHERE id = ?", (po_id,))
+
+        #5) confirm Sales order and materials
+        cursor.execute("SELECT * FROM sales_orders WHERE id = ? ", (po["sales_order_id"],))
+        so = cursor.fetchone()
+        if so and so["status"] == "Pending":
+            cursor.execute("SELECT stock FROM materials WHERE id = ? ",(po["material_id"],))
+            stock_now = cursor.fetchone["stock"]
+            if stock_now >= so["quantity"]:
+                cursor.execute("UPDATE materials SET stock = stock - ? WHERE id=?", (so["quantity"], po["material_id"]))
+                cursor.execute("UPDATE sales_orders SET status='Confirmed' WHERE id=?", (so["id"],))
+        conn.commit()
+    return jsonify({"message":"Production completed"}), 200
