@@ -51,15 +51,15 @@ def create_prod_order():
 
 @production_orders_bp.route("/production_orders/<int:po_id>/complete", methods = ["PUT"])
 def complete_production_order(po_id):
-    data = request.get.json() or {}
+    data = request.get_json() or {}
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         #1) Load PO
-        cursor.execute("SELECT * FROM production_orders WHERE id = ?", po_id)
+        cursor.execute("SELECT * FROM production_orders WHERE id = ?", (po_id,))
         po = cursor.fetchone()
         if not po: return jsonify({"error":"Production order not found"}), 404
-        if po["status"] == "completed": return jsonify({"error":"Already completed"}), 400
+        if po["status"] == "Completed": return jsonify({"error":"Production order already completed"}), 400
         
         #2) Decide quantity
         qty = int(data.get("actual_quantity", po["planned_quantity"]))
@@ -76,9 +76,13 @@ def complete_production_order(po_id):
         so = cursor.fetchone()
         if so and so["status"] == "Pending":
             cursor.execute("SELECT stock FROM materials WHERE id = ? ",(po["material_id"],))
-            stock_now = cursor.fetchone["stock"]
+            row = cursor.fetchone()
+            stock_now = row["stock"]
             if stock_now >= so["quantity"]:
                 cursor.execute("UPDATE materials SET stock = stock - ? WHERE id=?", (so["quantity"], po["material_id"]))
                 cursor.execute("UPDATE sales_orders SET status='Confirmed' WHERE id=?", (so["id"],))
         conn.commit()
-    return jsonify({"message":"Production completed"}), 200
+    return jsonify({
+    "production": "completed",
+    "sales_order": "completed"
+}), 200
