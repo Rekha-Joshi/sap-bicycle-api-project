@@ -60,18 +60,23 @@ CREATE TABLE IF NOT EXISTS cost_centers (
 
 -- Expenses Table (FI/CO)
 CREATE TABLE IF NOT EXISTS expenses (
-    id                 INTEGER PRIMARY KEY AUTOINCREMENT,
-    cost_center_id     INTEGER NOT NULL,
-    sales_order_id     INTEGER,                  -- nullable
-    production_order_id INTEGER,                 -- nullable
-    amount             REAL NOT NULL CHECK(amount >= 0),
-    description        TEXT,
-    expense_date       TEXT NOT NULL DEFAULT (DATE('now')),
-    FOREIGN KEY (cost_center_id)      REFERENCES cost_centers(id),
-    FOREIGN KEY (sales_order_id)      REFERENCES sales_orders(id),
-    FOREIGN KEY (production_order_id) REFERENCES production_orders(id),
-    CHECK ( (sales_order_id IS NOT NULL) OR (production_order_id IS NOT NULL) )
+  id                   INTEGER PRIMARY KEY AUTOINCREMENT,
+  cost_center_id       INTEGER NOT NULL,
+  sales_order_id       INTEGER,
+  production_order_id  INTEGER,
+  category             TEXT NOT NULL CHECK (category IN ('Manufacturing','PostProduction')),
+  amount               REAL NOT NULL CHECK (amount >= 0),
+  description          TEXT,
+  expense_date         TEXT NOT NULL DEFAULT (DATE('now')),
+  FOREIGN KEY (cost_center_id) REFERENCES cost_centers(id),
+  FOREIGN KEY (sales_order_id) REFERENCES sales_orders(id),
+  FOREIGN KEY (production_order_id) REFERENCES production_orders(id),
+  CHECK (
+    (category = 'Manufacturing'  AND production_order_id IS NOT NULL AND sales_order_id IS NULL) OR
+    (category = 'PostProduction' AND sales_order_id      IS NOT NULL AND production_order_id IS NULL)
+  )
 );
+
 
 -- Departments Table (HCM)
 CREATE TABLE IF NOT EXISTS departments (
