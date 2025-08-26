@@ -8,8 +8,50 @@ sales_orders_bp = Blueprint("sales_orders", __name__)
 #gloabal variable
 DB_PATH = "02_Database/bike_project.db"
 
+@sales_orders_bp.route("/sales_orders")
+def get_sales_orders():
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM sales_orders")
+        rows = cursor.fetchall()
+        sales = [
+            {
+                "customer id": row["customer_id"],
+                "material id": row["material_id"],
+                "quantity": row["quantity"],
+                "order date": row["order_date"],
+                "status": row["status"]
+            } for row in rows
+        ]
+        return Response(
+            json.dumps(sales, indent=2),
+            mimetype="applications/json"
+        )
+
+@sales_orders_bp.route("/sales_orders/<int:so_id>", methods=["GET"])
+def get_sale_order(so_id):
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM sales_orders WHERE id = ?", (so_id,))
+        row = cursor.fetchone()
+        sales = [
+            {
+                "customer id": row["customer_id"],
+                "material id": row["material_id"],
+                "quantity": row["quantity"],
+                "order date": row["order_date"],
+                "status": row["status"]
+            } 
+        ]
+        return Response(
+            json.dumps(sales, indent=2),
+            mimetype="applications/json"
+        )
+
 @sales_orders_bp.route("/sales_orders", methods=["POST"])
-def add_new_sales_order():
+def create_sales_order():
     data = request.get_json() or {}
     required = ("customer_id", "material_id", "quantity", "order_date")
     missing = [key for key in required if key not in data]
@@ -70,3 +112,57 @@ def add_new_sales_order():
         "status": status,
         "note": note
     }), 201
+
+@sales_orders_bp.route("/sales_orders/<int:so_id>/ship", methods=["POST"])
+def ship_sales_order(so_id):
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM sales_orders WHERE id = ?", (so_id,))
+        so = cursor.fetchone()
+        if not so:
+            return jsonify({"error":"Sales order not found."}), 404
+        if so["status"] == "Pending":
+            return jsonify({ "error": "Only confirmed sales orders can be shipped." }), 400
+        if so["status"] == "Cancelled":
+            return jsonify({ "error": "Cancelled sales orders cannot be shipped." }), 400
+        if so["status"] == "Shipped":
+            return jsonify({ "error": "Sales order is already shipped." }), 400
+        cursor.execute("UPDATE sales_orders SET status = 'Shipped' WHERE id = ?", (so_id,))
+        conn.commit()
+        return jsonify(
+            {
+                "message": "Sales order shipped successfully.",
+                "sales_order_id": so_id,
+                "status": "Shipped"
+                }
+        ), 200
+
+@sales_orders_bp.route("/sales_orders/<int:so_id>/cancel", methods=["POST"])
+def cancel_sales_order(so_id):
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM sales_orders WHERE id = ?", (so_id,))
+        so = cursor.fetchone()
+        if not so:
+            return jsonify({"error":"Sales order not found."}), 404
+        if so["status"] == "Cancelled":
+            return jsonify({ "error": "Sales order is already cancelled." }), 400
+        if so["status"] == "Shipped":
+            return jsonify({ "error": "Shipped sales orders cannot be cancelled." }), 400
+        if so["status"] not in("Pending", "Confirmed"):
+            return jsonify({ "error": "Only pending or confirmed sales orders can be cancelled." }), 400
+        #find attached production order
+        po = cursor.execute("SELECT * FROM production_orders WHERE sales_order_id = ?",(so_id,))
+        if po and po["status"] == "Completed":
+            return jsonify({ "error": "Production completed; cancellation not allowed." }), 400
+        cursor.execute("UPDATE sales_orders SET status = 'Cancelled' WHERE id = ?", (so_id,))
+        conn.commit()
+        return jsonify(
+            {
+                "message": "Sales order cancelled successfully.",
+                "sales_order_id": so_id,
+                "status": "Cancelled"
+                }
+        ), 200
