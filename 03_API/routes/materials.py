@@ -10,6 +10,7 @@ DB_PATH = "02_Database/bike_project.db"
 def get_materials():
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA foreign_keys = ON")
         cursor = conn.cursor()
         result = cursor.execute("SELECT * FROM  materials")
         rows = result.fetchall()
@@ -51,6 +52,7 @@ def set_materials():
             error.append(f"{material['name']} already exists.")
     
     with sqlite3.connect(DB_PATH) as conn:
+        conn.execute("PRAGMA foreign_keys = ON")
         cursor = conn.cursor()
         if isinstance(data, list):
             for item in data:
@@ -71,6 +73,7 @@ def check_stock():
     #.get("threshold") tries to fetch the value of threshold
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA foreign_keys = ON")
         cursor = conn.cursor()
         result = cursor.execute("SELECT * FROM materials where stock < ?",(threshold,))
         rows = result.fetchall()
@@ -109,6 +112,7 @@ def update_material_stock(id):
     if not isinstance(data["stock"], (int, float)):
         return jsonify({"error": "'stock' must be a number"}), 400
     with sqlite3.connect(DB_PATH) as conn:
+        conn.execute("PRAGMA foreign_keys = ON")
         cursor = conn.cursor()
         new_stock_value = int(data["stock"])
         cursor.execute ("UPDATE materials SET stock = ? where id = ?",(new_stock_value,id,))
@@ -124,6 +128,7 @@ def assign_vendor():
     data = request.get_json()
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA foreign_keys = ON")
         cursor = conn.cursor()
         if not data or "material_name" not in data or "vendor_id" not in data:
             return jsonify ({"error": "Missing mandatory filed. Check if 'material_name' and 'vendor_id' are present."}), 400

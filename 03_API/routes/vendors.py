@@ -13,6 +13,7 @@ DB_PATH = "02_Database/bike_project.db"
 def get_vendors():
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row #allow the access each row as a dictionary
+        conn.execute("PRAGMA foreign_keys = ON")
         cursor = conn.cursor() #create cursoe
         result = cursor.execute("SELECT * FROM vendors") #store the result of execute 
         rows = result.fetchall()# get all rows in a list
@@ -32,6 +33,7 @@ def set_vendors():
     data = request.get_json()
     try:
         with sqlite3.connect(DB_PATH) as conn:
+           conn.execute("PRAGMA foreign_keys = ON")
            cursor = conn.cursor()
            cursor.execute (
                 """

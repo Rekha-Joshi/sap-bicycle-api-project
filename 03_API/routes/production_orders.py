@@ -27,6 +27,7 @@ def create_prod_order():
         return jsonify({"error": "sales_order_id and planned_quantity must be numbers"}), 400
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA foreign_keys = ON")
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM sales_orders where id = ? AND status = 'Pending'", (so_id,))
         sales_order = cursor.fetchone()
@@ -49,11 +50,45 @@ def create_prod_order():
         "order_id": order_id,
     }), 201
 
+@production_orders_bp.route("/production_orders/<int:po_id>/start", methods = ["PUT"])
+def production_order_starts(po_id):
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA foreign_keys = ON")
+        cursor = conn.cursor()
+        #1)PO exists
+        cursor.execute("SELECT * FROM production_orders WHERE id = ?", (po_id,))
+        po = cursor.fetchone()
+        if not po:
+            return jsonify({"error":"Production order not found"}), 404
+        #2) PO status = Planned (not In-Progress/Completed/Cancelled)
+        if po["status"] in ("In-Progress", "Completed", "Cancelled"):
+            return jsonify({ "error": "Only 'Planned' production orders can be started." }), 400
+        #3)Linked Sales Order exists and is not Cancelled/Shipped
+        cursor.execute("SELECT * FROM sales_orders WHERE id =?",(po["sales_order_id"],))
+        so = cursor.fetchone()
+        if not so:
+            return jsonify({"error":"Linked sales order not found"}), 404
+        if so["status"] in ("Cancelled", "Shipped"):
+            return jsonify({ "error": "Linked sales order cannot be progressed (cancelled/shipped)." }), 400
+        cursor.execute("""
+                       UPDATE production_orders SET status = 'In-Progress' WHERE id = ?""",(po_id,)
+                    )
+        conn.commit()
+        return jsonify(
+            {
+                "message": "production order started", 
+                "production_order_id": po_id, 
+                "status": "In-Progress"
+            }
+        ), 200
+
 @production_orders_bp.route("/production_orders/<int:po_id>/complete", methods = ["PUT"])
 def complete_production_order(po_id):
     data = request.get_json() or {}
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA foreign_keys = ON")
         cursor = conn.cursor()
         #1) Load PO
         cursor.execute("SELECT * FROM production_orders WHERE id = ?", (po_id,))

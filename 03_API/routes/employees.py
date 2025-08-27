@@ -10,6 +10,7 @@ DB_PATH = "02_Database/bike_project.db"
 def add_employees():
     data = request.get_json()
     with sqlite3.connect(DB_PATH) as conn:
+        conn.execute("PRAGMA foreign_keys = ON")
         cursor = conn.cursor()
         if not all (key in data for key in ("name", "department_name", "job_title")):
             return jsonify({"error": "Missing required fields"}), 400

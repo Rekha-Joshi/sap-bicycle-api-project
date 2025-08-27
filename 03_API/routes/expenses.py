@@ -35,7 +35,7 @@ def create_expenses():
     if production_id is not None and not isinstance(production_id, int):
         return jsonify({"error": "production_order_id must be an integer"}), 400
     if (sales_id and category != "PostProduction") or (production_id and category != "Manufacturing"):
-        return jsonify({"error": "Category and order type mismatch"}), 400    
+        return jsonify({"error": "Category and order type mismatch"}), 400
     
     #4) check for amount and is a number and >=0
     if "amount" not in data:
@@ -48,6 +48,7 @@ def create_expenses():
     #5) check cost center id is present in cost_centers
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row #Read each row as dictionary
+        conn.execute("PRAGMA foreign_keys = ON")
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM cost_centers WHERE id = ?", (data["cost_center_id"],))
         ccid = cursor.fetchone()
@@ -58,11 +59,15 @@ def create_expenses():
             sales = cursor.fetchone()
             if not sales:
                 return jsonify({"error":"Sales order id not valid."}), 404
+            if sales["status"] == "Cancelled":
+                return jsonify({"error": "Cannot add expenses to a cancelled sales order."}), 400
         if production_id:
             cursor.execute("SELECT * FROM production_orders WHERE id = ?", (production_id,))
             prod = cursor.fetchone()
             if not prod:
                 return jsonify({"error":"Production order id not valid."}), 404
+            if prod["status"] == "Cancelled":
+                return jsonify({"error": "Cannot add expenses to a cancelled production order."}), 400
         #6) All checks passed. Add an entry to expenses table
         cursor.execute("""
                     INSERT INTO expenses(cost_center_id, sales_order_id, production_order_id, category, 

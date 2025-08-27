@@ -18,6 +18,7 @@ def get_customers():
     #create DB connections
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row #Allows access to each database row like a dictionary (e.g., row["name"])
+        conn.execute("PRAGMA foreign_keys = ON")
         cursor = conn.cursor() #create the cursor
         result = cursor.execute("SELECT * FROM customers") #Runs a query to fetch all customer records
         rows = result.fetchall() #Give me all rows returned by the query, in a list
@@ -44,6 +45,7 @@ def create_customer():
     data = request.get_json()
     try:
         with sqlite3.connect(DB_PATH) as conn:
+            conn.execute("PRAGMA foreign_keys = ON")
             cursor = conn.cursor()
             cursor.execute(
                 """
@@ -64,6 +66,7 @@ def get_customer_by_email():
         return jsonify({"error": "Email query parameter is required"}), 400
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA foreign_keys = ON")
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM customers WHERE email = ?",(email,))
         row = cursor.fetchone()

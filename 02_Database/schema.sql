@@ -34,8 +34,8 @@ CREATE Table IF NOT EXISTS sales_orders (
     quantity INTEGER,
     order_date TEXT,
     status TEXT,
-    FOREIGN KEY (customer_id) REFERENCES customers(id),
-    FOREIGN KEY (material_id) REFERENCES materials(id)
+    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE RESTRICT,
+    FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE RESTRICT
 );
 
 -- Production Orders Table (PP)
@@ -47,8 +47,8 @@ CREATE TABLE IF NOT EXISTS production_orders (
   start_date TEXT,   -- set when you create the PO (or now)
   end_date   TEXT,   -- set when you complete the PO
   status     TEXT,   -- "Planned" | "In-Progress" | "Completed"
-  FOREIGN KEY (sales_order_id) REFERENCES sales_orders(id),
-  FOREIGN KEY (material_id)     REFERENCES materials(id)
+  FOREIGN KEY (sales_order_id) REFERENCES sales_orders(id) ON DELETE RESTRICT,
+  FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE RESTRICT
 );
 
 -- Cost Centers Table (FI/CO)
@@ -68,9 +68,9 @@ CREATE TABLE IF NOT EXISTS expenses (
   amount               REAL NOT NULL CHECK (amount >= 0),
   description          TEXT,
   expense_date         TEXT NOT NULL DEFAULT (DATE('now')),
-  FOREIGN KEY (cost_center_id) REFERENCES cost_centers(id),
-  FOREIGN KEY (sales_order_id) REFERENCES sales_orders(id),
-  FOREIGN KEY (production_order_id) REFERENCES production_orders(id),
+  FOREIGN KEY (cost_center_id) REFERENCES cost_centers(id) ON DELETE RESTRICT,
+  FOREIGN KEY (sales_order_id) REFERENCES sales_orders(id) ON DELETE RESTRICT,
+  FOREIGN KEY (production_order_id) REFERENCES production_orders(id) ON DELETE RESTRICT,
   CHECK (
     (category = 'Manufacturing'  AND production_order_id IS NOT NULL AND sales_order_id IS NULL) OR
     (category = 'PostProduction' AND sales_order_id      IS NOT NULL AND production_order_id IS NULL)
