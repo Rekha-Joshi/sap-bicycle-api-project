@@ -117,7 +117,7 @@ def create_sales_order():
         "note": note
     }), 201
 
-@sales_orders_bp.route("/sales_orders/<int:so_id>/ship", methods=["POST"])
+@sales_orders_bp.route("/sales_orders/<int:so_id>/ship", methods=["PATCH"])
 def ship_sales_order(so_id):
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
@@ -143,7 +143,7 @@ def ship_sales_order(so_id):
                 }
         ), 200
 
-@sales_orders_bp.route("/sales_orders/<int:so_id>/cancel", methods=["POST"])
+@sales_orders_bp.route("/sales_orders/<int:so_id>/cancel", methods=["PATCH"])
 def cancel_sales_order(so_id):
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
