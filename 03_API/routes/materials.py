@@ -15,7 +15,7 @@ def get_materials():
     params = []
     if m_type:
         where.append("LOWER(type) = ?")
-        params.append(f"%{m_type.lower()}%")
+        params.append(m_type.lower())
     if name_q:
         where.append("LOWER(name) like ?")
         params.append(f"%{name_q.lower()}%")
@@ -252,7 +252,7 @@ def update_materials(mat_id):
 
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
-        conn.execute("PRAGMA foreign keys = ON")
+        conn.execute("PRAGMA foreign_keys = ON")
         cursor = conn.cursor()
         #check if material exists
         cursor.execute("SELECT * FROM materials WHERE id = ?",(mat_id,))

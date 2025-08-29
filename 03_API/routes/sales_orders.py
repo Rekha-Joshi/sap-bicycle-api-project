@@ -10,7 +10,7 @@ sales_orders_bp = Blueprint("sales_orders", __name__)
 DB_PATH = "02_Database/bike_project.db"
 
 @sales_orders_bp.route("/sales_orders")
-def get_sales_orders():
+def get_sales_orders(): #All sales orders
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA foreign_keys = ON")
@@ -32,13 +32,15 @@ def get_sales_orders():
         )
 
 @sales_orders_bp.route("/sales_orders/<int:so_id>", methods=["GET"])
-def get_sale_order(so_id):
+def get_sale_order(so_id): #get sale order by ID
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA foreign_keys = ON")
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM sales_orders WHERE id = ?", (so_id,))
         row = cursor.fetchone()
+        if not row:
+            return jsonify({"error":"Sales order not found."}), 404
         sales = [
             {
                 "customer id": row["customer_id"],
@@ -54,7 +56,7 @@ def get_sale_order(so_id):
         )
 
 @sales_orders_bp.route("/sales_orders", methods=["POST"])
-def create_sales_order():
+def create_sales_order(): #create new sales order
     data = request.get_json() or {}
     required = ("customer_id", "material_id", "quantity", "order_date")
     missing = [key for key in required if key not in data]
@@ -118,7 +120,7 @@ def create_sales_order():
     }), 201
 
 @sales_orders_bp.route("/sales_orders/<int:so_id>/ship", methods=["PATCH"])
-def ship_sales_order(so_id):
+def ship_sales_order(so_id): #update status to shipped
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA foreign_keys = ON")
@@ -144,7 +146,7 @@ def ship_sales_order(so_id):
         ), 200
 
 @sales_orders_bp.route("/sales_orders/<int:so_id>/cancel", methods=["PATCH"])
-def cancel_sales_order(so_id):
+def cancel_sales_order(so_id): #update status to cancel
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA foreign_keys = ON")
