@@ -5,3 +5,4 @@ from .employees import employees_bp
 from .sales_orders import sales_orders_bp
 from .production_orders import production_orders_bp
 from .expenses import expenses_bp
+from .cost_centers import cost_centers_bp

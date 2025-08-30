@@ -9,8 +9,58 @@ production_orders_bp = Blueprint("production_orders", __name__)
 #gloabal variable
 DB_PATH = "02_Database/bike_project.db"
 
+@production_orders_bp.route("/production_orders")
+def get_production_orders(): #get all production orders
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA foreign_keys = ON")
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM production_orders")
+        po = cursor.fetchall()
+        data = [
+            {
+                "production id":row["id"],
+                "sales order id":row["sales_order_id"],
+                "material id":row["material_id"],
+                "planned quantity":row["planned_quantity"],
+                "start date":row["start_date"],
+                "end date":row["end_date"],
+                "status":row["status"]
+            } for row in po
+        ]
+        return Response(
+            json.dumps(data, indent=2),
+            mimetype="application/json"
+        ), 200
+
+@production_orders_bp.route("/production_orders/<int:po_id>")
+def get_production_order(po_id): #get production order by id
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA foreign_keys = ON")
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM production_orders WHERE id=?",(po_id,))
+        po = cursor.fetchone()
+        if not po:
+            return jsonify({"error":"Production order not found."}), 404
+        data = [
+            {
+                "production id":po["id"],
+                "sales order id":po["sales_order_id"],
+                "material id":po["material_id"],
+                "planned quantity":po["planned_quantity"],
+                "start date":po["start_date"],
+                "end date":po["end_date"],
+                "status":po["status"]
+            }
+        ]
+        return Response(
+            json.dumps(data, indent=2),
+            mimetype="application/json"
+        ), 200
+
 @production_orders_bp.route("/production_orders", methods = ["POST"])
-def create_prod_order():
+def create_prod_order(): #create new production order
     data = request.get_json() or {}
     if not data or "sales_order_id" not in data:
         return jsonify({"Error":"Sales order id missing."}), 400
@@ -50,8 +100,8 @@ def create_prod_order():
         "order_id": order_id,
     }), 201
 
-@production_orders_bp.route("/production_orders/<int:po_id>/start", methods = ["PUT"])
-def production_order_starts(po_id):
+@production_orders_bp.route("/production_orders/<int:po_id>/start", methods = ["PATCH"])
+def production_order_starts(po_id): #start the production order
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA foreign_keys = ON")
@@ -83,8 +133,8 @@ def production_order_starts(po_id):
             }
         ), 200
 
-@production_orders_bp.route("/production_orders/<int:po_id>/complete", methods = ["PUT"])
-def complete_production_order(po_id):
+@production_orders_bp.route("/production_orders/<int:po_id>/complete", methods = ["PATCH"])
+def complete_production_order(po_id): #complete the production order
     data = request.get_json() or {}
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
@@ -118,6 +168,6 @@ def complete_production_order(po_id):
                 cursor.execute("UPDATE sales_orders SET status='Confirmed' WHERE id=?", (so["id"],))
         conn.commit()
     return jsonify({
-    "production": "completed",
-    "sales_order": "completed"
-}), 200
+        "production": "completed",
+        "sales_order": "completed"
+    }), 200

@@ -9,6 +9,58 @@ expenses_bp = Blueprint("expenses", __name__)
 #gloabal variable
 DB_PATH = "02_Database/bike_project.db"
 
+@expenses_bp.route("/expenses")
+def get_expenses(): #get all expenses
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA foreign_keys = ON")
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM expenses")
+        rows = cursor.fetchall()
+        if not rows:
+            return jsonify({"error":"There are no expenses."}),400
+        expenses = [
+            {
+                "cost center id":row["cost_center_id"],
+                "sales order id":row["sales_order_id"],
+                "production order id": row["production_order_id"],
+                "category": row["category"],
+                "amount": row["amount"],
+                "description":row["description"],
+                "expense date":row["expense_date"]
+            } for row in rows
+        ]
+        return Response(
+            json.dumps(expenses, indent=2),
+            mimetype="applications/json"
+        ),200
+
+@expenses_bp.route("/expenses/<int:exp_id>")
+def get_expense(exp_id): #get expense by id
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA foreign_keys = ON")
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM expenses WHERE id=?",(exp_id,))
+        data = cursor.fetchone()
+        if not data:
+            return jsonify({"error":"Expense not found."}), 404
+        expense = [
+            {
+                "cost center id":data["cost_center_id"],
+                "sales order id":data["sales_order_id"],
+                "production order id": data["production_order_id"],
+                "category": data["category"],
+                "amount": data["amount"],
+                "description":data["description"],
+                "expense date":data["expense_date"]
+            }
+        ]
+        return Response(
+            json.dumps(expense, indent=2),
+            mimetype="applications/json"
+        ),200
+    
 @expenses_bp.route("/expenses", methods=["POST"])
 def create_expenses():
     data = request.get_json() or {}
