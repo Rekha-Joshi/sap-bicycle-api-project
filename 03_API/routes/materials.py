@@ -69,40 +69,113 @@ def get_material(mat_id):
     
 #add new materials. single or bulk
 @materials_bp.route("/materials", methods=["POST"])
-def set_materials():
+def set_materials():  # create materials (single or bulk)
     data = request.get_json()
-    error = [] # to store errors when trying to add multiple materials. 
-    def insert_materials(material): #helper function
-        try:
-            cursor.execute (
-                """
-                INSERT INTO materials(name, type, unit_price, stock, vendor_id)
-                VALUES (?,?,?,?,?)
-                """, 
-                (
-                        material["name"], 
-                        material["type"], 
-                        material["unit_price"], 
-                        material["stock"],
-                        material.get("vendor_id") # if blank, it won't throw error. vendor_id will be empty for finished product
-                )
-            )
-        except sqlite3.IntegrityError:
-            error.append(f"{material['name']} already exists.")
-    
+    if data is None:
+        return jsonify({"error": "Invalid JSON body"}), 400
+
+    items = data if isinstance(data, list) else [data] if isinstance(data, dict) else None
+    if items is None:
+        return jsonify({"error": "Body must be an object or an array of objects"}), 400
+
+    allowed_types = {"Raw", "Finished"}
+    errors = []
+    inserted_count = 0
+    had_validation_error = False
+    had_conflict_error = False
+
     with sqlite3.connect(DB_PATH) as conn:
+        conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA foreign_keys = ON")
         cursor = conn.cursor()
-        if isinstance(data, list):
-            for item in data:
-                insert_materials(item)
-        else:
-            insert_materials(data)
-        conn.commit()
-    if error:
-        return jsonify({"message": "Some materials were not added", "errors": error}), 409
 
+        for idx, raw in enumerate(items, 1):
+            item_errors = []
+
+            # name
+            if "name" not in raw or not isinstance(raw["name"], str) or not raw["name"].strip():
+                item_errors.append(f"Item {idx}: Name is required and must be a non-empty string")
+            else:
+                m_name = raw["name"].strip()
+
+            # type
+            if "type" not in raw or not isinstance(raw["type"], str) or not raw["type"].strip():
+                item_errors.append(f"Item {idx}: Type is required and must be either 'Raw' or 'Finished'")
+                m_type = None
+            else:
+                m_type = raw["type"].strip().title()
+                if m_type not in allowed_types:
+                    item_errors.append(f"Item {idx}: Type must be Raw or Finished")
+
+            # unit_price > 0
+            if "unit_price" not in raw or not isinstance(raw["unit_price"], (int, float)) or raw["unit_price"] <= 0:
+                item_errors.append(f"Item {idx}: Unit price is required and must be a number > 0")
+            else:
+                m_unit_price = float(raw["unit_price"])
+
+            # stock >= 0
+            if "stock" not in raw or not isinstance(raw["stock"], int) or raw["stock"] < 0:
+                item_errors.append(f"Item {idx}: Stock is required and must be an integer >= 0")
+            else:
+                m_stock = int(raw["stock"])
+
+            # reorder_level (default 30)
+            if "reorder_level" in raw and raw["reorder_level"] is not None:
+                if not isinstance(raw["reorder_level"], int) or raw["reorder_level"] < 0:
+                    item_errors.append(f"Item {idx}: Reorder level must be a non-negative integer")
+                    m_reorder_level = 30
+                else:
+                    m_reorder_level = int(raw["reorder_level"])
+            else:
+                m_reorder_level = 30
+
+            # vendor rules
+            m_vendor_id = None
+            if m_type == "Raw":
+                if "vendor_id" not in raw or not isinstance(raw["vendor_id"], int) or raw["vendor_id"] <= 0:
+                    item_errors.append(f"Item {idx}: vendor_id is required for Raw materials and must be a positive integer")
+                else:
+                    m_vendor_id = raw["vendor_id"]
+            elif m_type == "Finished":
+                if "vendor_id" in raw:
+                    item_errors.append(f"Item {idx}: vendor_id must not be provided for Finished materials")
+
+            # if any validation failed, skip insert
+            if item_errors:
+                had_validation_error = True
+                errors.extend(item_errors)
+                continue
+
+            # insert
+            try:
+                cursor.execute(
+                    """
+                    INSERT INTO materials (name, type, unit_price, stock, reorder_level, vendor_id)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    """,
+                    (m_name, m_type, m_unit_price, m_stock, m_reorder_level, m_vendor_id)
+                )
+                inserted_count += 1
+            except sqlite3.IntegrityError as e:
+                had_conflict_error = True
+                msg = str(e).lower()
+                if "foreign key" in msg:
+                    errors.append(f"Item {idx}: vendor not found")
+                elif "unique" in msg or "materials.name" in msg:
+                    errors.append(f"Item {idx}: {m_name} already exists.")
+                else:
+                    errors.append(f"Item {idx}: integrity error")
+                continue
+
+        conn.commit()
+
+    # Decide status
+    if inserted_count == 0 and had_validation_error:
+        return jsonify({"message": "Invalid input", "errors": errors}), 400
+    if had_validation_error or had_conflict_error:
+        return jsonify({"message": "Some materials were not added", "errors": errors}), 409
     return jsonify({"message": "Material(s) added successfully."}), 201
+
 
 #lists materials which are low in stock
 @materials_bp.route("/materials/low-stock")
@@ -233,7 +306,7 @@ def update_materials(mat_id):
             return jsonify({"error": "unit_price must be a number"}), 400
         if val < 0:
             return jsonify({"error": "unit_price must be >= 0"}), 400      
-    #8) check reorder level >= 30 (30 is default)
+    #8) check reorder level >= 0 (30 is default)
     if "reorder_level" in updates:
         val = updates["reorder_level"]
         if not isinstance(val, int):
