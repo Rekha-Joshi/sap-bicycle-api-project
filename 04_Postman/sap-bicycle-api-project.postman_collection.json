@@ -1,0 +1,1290 @@
+{
+	"info": {
+		"_postman_id": "97187174-486a-4f1b-bfec-2ce6e3778f82",
+		"name": "sap-bicycle-api-project",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "13702779"
+	},
+	"item": [
+		{
+			"name": "Materials",
+			"item": [
+				{
+					"name": "Create new material",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"201 & JSON\", ()=>{",
+									"    pm.response.to.have.status(201);",
+									"    pm.response.to.be.json;",
+									"});",
+									"const response = pm.response.json();",
+									"pm.test(\"Has success message\", ()=> pm.expect(response).to.have.property(\"message\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Front Wheel\",\n  \"type\": \"Raw\",\n  \"unit_price\": 85.5,\n  \"stock\": 25,\n  \"reorder_level\": 10\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/materials",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"materials"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create new material - Batch mixed",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status 400 for mixed valid+invalid\", ()=>{",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"const response = pm.response.json();",
+									"pm.test(\"Has error message\", ()=> pm.expect(response).to.have.property(\"errors\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\n  {\n    \"name\": \"Steel Spoke\",\n    \"type\": \"Raw\",\n    \"unit_price\": 25,\n    \"stock\": 30,\n    \"vendor_id\": 4\n  },\n  {\n    \"name\": \"\",\n    \"type\": \"Finished\",\n    \"unit_price\": 40,\n    \"stock\": 5\n  }\n]\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/materials",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"materials"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create new material - default reorder level",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"201 & JSON\", ()=>{",
+									"    pm.response.to.have.status(201);",
+									"    pm.response.to.be.json;",
+									"});",
+									"const response = pm.response.json();",
+									"pm.test(\"Has success message\", ()=> {",
+									"    pm.expect(response).to.have.property(\"message\")",
+									"    pm.expect(response.message).to.equal(\"Material(s) added successfully.\")",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Chain Guard\",\n  \"type\": \"Finished\",\n  \"unit_price\": 25,\n  \"stock\": 12\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/materials",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"materials"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create new material - duplicate(409)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"409 & JSON\", ()=>{",
+									"    pm.response.to.have.status(409);",
+									"    pm.response.to.be.json;",
+									"});",
+									"const response = pm.response.json();",
+									"pm.test(\"Has error message\", ()=> pm.expect(response).to.have.property(\"errors\"));",
+									"pm.test(\"Errors array not empty and has message containing 'already exists.'\", () => {",
+									"    pm.expect(response.errors).to.be.an(\"array\").that.is.not.empty;",
+									"    pm.expect(response.errors[0].toLowerCase()).to.include(\"already exists.\");",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Front Wheel\",\n  \"type\": \"Finished\",\n  \"unit_price\": 85.5,\n  \"stock\": 25,\n  \"reorder_level\": 10\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/materials",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"materials"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create new material - missing name(400)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"400 & JSON\", ()=>{",
+									"    pm.response.to.have.status(400);",
+									"    pm.response.to.be.json;",
+									"});",
+									"const response = pm.response.json();",
+									"pm.test(\"Error message is correct and contains specific error details\", () => {",
+									"    pm.expect(response.message).to.eql(\"Invalid input\");",
+									"    pm.expect(response.errors[0].toLowerCase()).to.include(\"name is required\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"Finished\",\n  \"unit_price\": 85.5,\n  \"stock\": 25,\n  \"reorder_level\": 10\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/materials",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"materials"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List all materials",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 & JSON\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    pm.response.to.be.json;",
+									"});",
+									"const data = pm.response.json();",
+									"pm.test(\"Response is an array and each item has required fields\", () => {",
+									"    pm.expect(data).to.be.an(\"array\").that.is.not.empty;",
+									"",
+									"    data.forEach(item => {",
+									"        pm.expect(item).to.have.all.keys(\"name\", \"type\", \"unit_price\", \"stock\", \"reorder_level\", \"vendor_id\");",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseURL}}/materials",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"materials"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get material by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 & JSOB\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    pm.response.to.be.json;",
+									"});",
+									"const data = pm.response.json();",
+									"pm.test(\"Check if the response body matches the expected data\", ()=> {",
+									"    pm.expect(data).to.have.property(\"name\");",
+									"    pm.expect(data).to.have.property(\"reorder_level\");",
+									"    pm.expect(data).to.have.property(\"stock\");",
+									"    pm.expect(data).to.have.property(\"type\");",
+									"    pm.expect(data).to.have.property(\"unit_price\");",
+									"    pm.expect(data).to.have.property(\"vendor_id\");",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseURL}}/materials/12",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"materials",
+								"12"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Get material by ID",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{baseURL}}/materials/12",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"materials",
+										"12"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "",
+							"header": [
+								{
+									"key": "Server",
+									"value": "Werkzeug/3.1.3 Python/3.13.3"
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 02 Sep 2025 06:09:15 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "117"
+								},
+								{
+									"key": "Connection",
+									"value": "close"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"name\": \"Chain\",\n    \"reorder_level\": 30,\n    \"stock\": 50,\n    \"type\": \"raw\",\n    \"unit_price\": 25,\n    \"vendor_id\": 2\n}"
+						}
+					]
+				},
+				{
+					"name": "Filter by type",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseURL}}/materials?type=finished",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"materials"
+							],
+							"query": [
+								{
+									"key": "type",
+									"value": "finished"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update fields",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Front Wheel – V2\",\n  \"type\": \"Raw\",\n  \"unit_price\": 90,\n  \"reorder_level\": 12\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/materials/32",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"materials",
+								"32"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update stock",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"stock\": 35\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/materials/16/stock",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"materials",
+								"16",
+								"stock"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Assign vendor",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"material_name\": \"Bike Frame (Aluminum)\",\n  \"vendor_id\": 3\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/materials/assign_vendor",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"materials",
+								"assign_vendor"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Low stock list",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseURL}}/materials/low-stock?threshold=10",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"materials",
+								"low-stock"
+							],
+							"query": [
+								{
+									"key": "threshold",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							"pm.test(\"Content-Type is application/json\", ()=> {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"});",
+							"pm.test(\"Response time < 500ms\", ()=> {",
+							"    pm.expect(pm.response.responseTime).to.be.below(500);",
+							"});",
+							"if(pm.request.method === \"GET\" && pm.request.url.getPath().includes(\"/materials\")){",
+							"    let data = pm.response.json();",
+							"    //if it's array or list, pick the first item id",
+							"    if (Array.isArray(data) && data.length > 0){",
+							"        pm.collectionVariables.set(\"material_id\",data[0].id);",
+							"        console.log(\"Saved material_id:\",data[0].id);",
+							"    }",
+							"    else if (data.id){ //if single item",
+							"        pm.collectionVariables.set(\"material_id\",data.id);",
+							"        console.log(\"Saved material_id:\",data.id);",
+							"    }",
+							"}"
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Customer",
+			"item": [
+				{
+					"name": "Create customer",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"phone\": \"+1-604-555-1234\",\n  \"address\": \"123 Main Street, Vancouver, BC, Canada\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/customers",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"customers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List all customers",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', () => {",
+									"    pm.response.to.have.status(200);",
+									"})"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseURL}}/customers",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"customers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get customer by email",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Customer found successfully', () => {",
+									"    let response = pm.response.json();",
+									"    pm.expect(response).to.haveOwnProperty('id');",
+									"    //pm.collectionVariables.set('customerID', response.id);",
+									"});",
+									"    "
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/customers/by-email?email=bob.smith@email.com",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"customers",
+								"by-email"
+							],
+							"query": [
+								{
+									"key": "email",
+									"value": "bob.smith@email.com"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update customer",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Alice Johnson Updated\",\n  \"email\": \"alice.new@email.com\",\n  \"phone\": \"555-9999\",\n  \"address\": \"987 Cedar St\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/customers/1",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"customers",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Vendor",
+			"item": [
+				{
+					"name": "Create vendor",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201, function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Status code is 409, function () {",
+									"    pm.response.to.have.status(409);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"GreenTrail Supplies\",\n  \"contact\": \"contact@greentrail.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/vendors",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"vendors"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List all vendors",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseURL}}/vendors",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"vendors"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get vendor by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/vendors/3",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"vendors",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List materials supplied by vendor",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/vendors/3/materials",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"vendors",
+								"3",
+								"materials"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Sales Order",
+			"item": [
+				{
+					"name": "Create sales order",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Sales Order created successfully', () => {",
+									"    let response = pm.response.json();",
+									"    pm.expect(response).to.haveOwnProperty('order_id');",
+									"    pm.collectionVariables.set('sales_order_id', response.order_id);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customer_id\": 12,\n  \"material_id\": 2,\n  \"quantity\": 5,\n  \"order_date\": \"2025-08-28\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/sales_orders",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"sales_orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List sales orders",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/sales_orders",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"sales_orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get sales order by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/sales_orders/6",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"sales_orders",
+								"6"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Mark as Shipped",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/sales_orders/5/ship",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"sales_orders",
+								"5",
+								"ship"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Mark as Cancelled",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/sales_orders/7/cancel",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"sales_orders",
+								"7",
+								"cancel"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Production Order",
+			"item": [
+				{
+					"name": "Create production order",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"sales_order_id\": 7,\n  \"planned_quantity\": 10,\n  \"start_date\": \"2025-08-28\",\n  \"end_date\": \"2025-08-31\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/production_orders",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"production_orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List all production orders",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"sales_order_id\": {{sales_order_id}},\n  \"planned_quantity\": 10,\n  \"start_date\": \"2025-08-18\",\n  \"end_date\": \"2025-08-25\"\n}"
+						},
+						"url": {
+							"raw": "{{baseURL}}/production_orders",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"production_orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get production order by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/production_orders/2",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"production_orders",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Start production order",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/production_orders/2/start",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"production_orders",
+								"2",
+								"start"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Complete production order",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"actual_quantity\":15\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/production_orders/1/complete",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"production_orders",
+								"1",
+								"complete"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Employees",
+			"item": [
+				{
+					"name": "Add employee",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Neha Kapoor\",\n  \"department_name\": \"Sales\",\n  \"job_title\": \"Sales Analyst\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/employees",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"employees"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List all employees",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/employees",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"employees"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Expenses",
+			"item": [
+				{
+					"name": "Create expense",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"cost_center_id\": 2,\n  \"sales_order_id\": 15,\n  \"amount\": 200,\n  \"description\": \"Freight charge\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/expenses",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"expenses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List all expenses",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/expenses",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"expenses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get expense by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/expenses/3",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"expenses",
+								"3"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Cost Centers",
+			"item": [
+				{
+					"name": "Create cost center",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n   \"code\": \"CC1007\",\n   \"name\": \"Production Dept\"\n    \n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/cost_centers",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"cost_centers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List all cost centers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/cost_centers",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"cost_centers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get cost center by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/cost_centers/3",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"cost_centers",
+								"3"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseURL",
+			"value": "http://127.0.0.1:5000/",
+			"type": "string"
+		},
+		{
+			"key": "customerID",
+			"value": ""
+		},
+		{
+			"key": "sales_order_id",
+			"value": ""
+		},
+		{
+			"key": "material_id",
+			"value": ""
+		}
+	]
+}
