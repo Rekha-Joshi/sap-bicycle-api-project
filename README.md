@@ -27,3 +27,15 @@ This project is designed as a QA/Testing portfolio project, so the focus is on:
 To keep the code simple and easy to follow, I placed validations directly inside the route functions instead of creating separate helper functions or classes.
 
 In a production system, these checks would normally be moved into helper functions, classes, or middleware for reusability and maintainability.
+
+# Git Workflow (Bike Project)
+
+During this project I practiced using Git for version control.  
+The main commands I used were:
+
+- `git status` → check which files changed
+- `git add .` → stage all changes
+- `git commit -am "message"` → save changes locally
+- `git push origin main` → push changes to GitHub
+
+I worked directly on the `main` branch for this project.
